@@ -1,3 +1,7 @@
+##### About this fork
+This is a fork of [h265ize](https://github.com/FallingSnow/h265ize) that adds a few features not accepted into the upstream version. Namely, the ability to reencode audio into `aac` in addition to `opus` for better
+device compatibility, along with more tunables for bitrates, and metadata.
+
 ##### Updgrading to 0.4.x
 h265ize has experienced a major overhaul. Versions up to 0.3.x are written in bash and should work on most systems. Version 0.4.x onward requires nodejs in order to function.
 
