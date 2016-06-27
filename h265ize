@@ -279,14 +279,18 @@ h265ize.parseOptions = function() {
                     type: 'boolean',
                     group: 'Advanced:'
                 },
+                'help': {
+                    describe: 'Displays help page.',
+                    group: 'Options:'
+                },
                 'test': {
                     default: userSettings['test'] || false,
                     describe: 'Puts h265ize in test mode. No files will be encoded.',
                     type: 'boolean',
                     group: 'Options:'
                 },
-                'help': {
-                    describe: 'Displays help page.',
+                'version': {
+                    describe: 'Displays version information.',
                     group: 'Options:'
                 },
             })
@@ -298,6 +302,12 @@ h265ize.parseOptions = function() {
             console.log(colors.underline('Package:'), colors.yellow(packageSettings.name), '\t', colors.underline('Version:'), colors.yellow(packageSettings.version));
             console.log(colors.underline('Description:'), packageSettings.description);
             yargs.showHelp();
+            process.exit(0);
+        }
+
+        // Show version
+        if (args.version) {
+            console.log(packageSettings.name, packageSettings.version);
             process.exit(0);
         }
 
@@ -755,8 +765,27 @@ h265ize.processVideo = function(video) {
                         }),
                         size: filesize(metadata.format.size)
                     });
+                    if (!_.isNumber(metadata.format.duration)) {
+                        logger.alert('Could not retrieve video duration. Computing duration...');
+                        new ffmpeg({
+                            logger: logger
+                        }).input(video).outputFormat('null').output('-').on('end', function(stdout, stderr) {
+                            let lines = stderr.split('\n');
+                            let lastTime = lines[lines.length - 3];
+                            let duration = lastTime.match(new RegExp('time=(([0-9]|\:|\.)+) bitrate'))[1];
 
-                    resolve(metadata);
+                            // Fix bug with momentjs https://github.com/moment/moment/issues/3266
+                            if (duration.indexOf('.') <= duration.length - 3) {
+                                duration += '000';
+                            }
+
+                            let seconds = moment.duration(duration);
+                            metadata.format.duration = seconds.format("s", 6);
+                            resolve(metadata);
+                        }).run();
+                    }
+                    else
+                        resolve(metadata);
                 });
             });
         };
@@ -1481,11 +1510,14 @@ function cleanUp(ending) {
             }
         });
     }
+    else {
+        if (temp.files.length)
+            logger.alert('The following temporary files were not deleted because you are in debug mode:', temp.files);
+    }
+
     if (ending) {
         if (statsFile)
             statsFile.end();
-        if (temp.files.length)
-            logger.alert('The following temporary files were not deleted because you are in debug mode:', temp.files);
 
         if (temp.commandQueue.length)
             _.each(temp.commandQueue, function(command, i) {

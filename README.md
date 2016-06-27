@@ -107,13 +107,19 @@ While in the h265ize directory run `git pull`.
 
 > --no-auto-audio-titles :Disable automated title generation for audio streams that do not have preexisting titles.
 
+> --no-auto-subtitle-titles :Disable automated title generation for subtitle streams that do not have preexisting titles.
+
 > --screenshots :Take 6 screenshots at regular intervals throughout the finished encode
 
 > --stats: Creates a stats file in the destination named h265ize.csv
 
 > --video-bitrate :Sets the video bitrate, set to 0 to use qp instead of a target bitrate
 
+> --test: Test mode; Runs as normal, but do not encode any files
+
 > --help :Help; Shows help page
+
+> --version: Show version information
 
 Run `h265ize --help` for more info.
 
